@@ -50,4 +50,24 @@ codeunit 50010 "Automotive Assist Setup Sub"
         if Confirm('It Seems that you have already completed the setup, would you like to rerun the setup?', true) then
             Page.RunModal(Page::AutomotiveAssistedSetup)
     end;
+
+    [EventSubscriber(ObjectType::Codeunit, Codeunit::"Guided Experience", 'OnRerunOfCompletedAssistedSetup', '', false, false)]
+    local procedure "Guided Experience_OnAfterRunAssistedSetup"(ExtensionID: Guid; ObjectType: ObjectType; ObjectID: Integer)
+    var
+        AutomotiveSetup: Record "Automotive Setup";
+    begin
+        if ExtensionID <> GetMyAppID() then
+            exit;
+
+        if (ObjectType <> ObjectType::Page) or (ObjectID <> Page::AutomotiveAssistedSetup) then
+            exit;
+
+        AutomotiveSetup.InsertIfNotExists();
+        if AutomotiveSetup."No. Series" <> '' then begin
+            UpdatedSetupStatus();
+            Message('Congrats');
+            //LogMessage();
+        end;
+
+    end;
 }
